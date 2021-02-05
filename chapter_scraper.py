@@ -5,9 +5,6 @@ import datetime
 from selenium.webdriver.firefox.options import Options
 
 
-months = {"Jan":"1","Feb":"2","Mar":"3","Apr":"4","May":"5","Jun":"6","Jul":"7","Aug":"8","Sep":"9","Oct":"10","Nov":"11","Dec":"12"}
-
-
 def create_webdriver():
     options = Options()
     options.add_argument("--headless")
@@ -16,17 +13,15 @@ def create_webdriver():
     return driver
 
 
-def find_chapter_link_mp(curren_chapter):
-    driver = create_webdriver()
+def find_chapter_link_mp(driver,curren_chapter):
     driver.get("https://mangaplus.shueisha.co.jp/titles/100017")
     data = driver.find_elements_by_class_name("ChapterListItem-module_chapterListItem_ykICp")
-    driver.quit()
     chapter = -1
     link = "https://mangaplus.shueisha.co.jp/viewer/"
     items = []
 
     if data == []: 
-            return find_chapter_link_mp()
+            return find_chapter_link_mp(driver,curren_chapter)
     else:
         for element in data: 
             
@@ -46,11 +41,9 @@ def find_chapter_link_mp(curren_chapter):
                 return ((items[i],items[i+1],items[i+2],link+(items[i+3][len("https://mangaplus.shueisha.co.jp/drm/title/100017/chapter/"):]).split("/")[0]))
 
 
-def find_chapter_date():
-    driver = create_webdriver()
+def find_chapter_date(driver):
     driver.get("https://mangaplus.shueisha.co.jp/titles/100017")
     data = driver.find_elements_by_tag_name("p")
-    driver.quit()
     date_of_chapter = ""  
 
     for i in data: 
@@ -58,12 +51,14 @@ def find_chapter_date():
             date_of_chapter = i.text
     
     if date_of_chapter == "":
-        return find_chapter_date()
+        return find_chapter_date(driver)
     
     split_date = date_of_chapter.split(", ")
     return datetime.datetime(2020,(int)(months[(split_date[1][:-3])]),(int)(split_date[1][4:]),(int)(split_date[2][:-3]))
 
 
     
-print(find_chapter_date())
-print(find_chapter_link_mp("299"))
+months = {"Jan":"1","Feb":"2","Mar":"3","Apr":"4","May":"5","Jun":"6","Jul":"7","Aug":"8","Sep":"9","Oct":"10","Nov":"11","Dec":"12"}
+driver = create_webdriver()
+print(find_chapter_date(driver))
+print(find_chapter_link_mp(driver,"299"))
