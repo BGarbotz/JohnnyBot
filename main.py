@@ -1,12 +1,9 @@
 import discord
-import os
 import json
-import tweepy
-import selenium
-import selenium.webdriver as webdriver
+#import tweepy
 import requests
 import datetime
-from selenium.webdriver.firefox.options import Options
+import chapter_scraper
 
 
 months = {"Jan":"1","Feb":"2","Mar":"3","Apr":"4","May":"5","Jun":"6","Jul":"7","Aug":"8","Sep":"9","Oct":"10","Nov":"11","Dec":"12"}
@@ -15,11 +12,7 @@ months = {"Jan":"1","Feb":"2","Mar":"3","Apr":"4","May":"5","Jun":"6","Jul":"7",
 client = discord.Client()
 with open("settings.json") as json_data:
   settings = json.load(json_data)
-
-options = Options()
-options.add_argument("--headless")
-driver = webdriver.Firefox(options=options)
-driver.implicitly_wait(5)
+client.run(settings["settings"]["token"])
 
 
 def find_chapter_link_mp(driver):
@@ -100,6 +93,7 @@ async def on_message(message):
   elif settings["settings"]["channel"] == "" and message.content.startswith("$"):
     await message.channel.send("Please specify a designated channel first!")
 
+
 def set_channel(new_channel):
   settings["settings"]["channel"] = new_channel
 
@@ -108,7 +102,5 @@ def set_channel(new_channel):
 
 
 
-
-
-
-client.run(settings["settings"]["token"])
+print(find_chapter_date())
+print(find_chapter_link_mp("299"))
