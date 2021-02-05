@@ -22,33 +22,34 @@ driver = webdriver.Firefox(options=options)
 driver.implicitly_wait(5)
 
 
-def find_chapter_link(driver):
+def find_chapter_link_mp(driver):
     driver.get("https://mangaplus.shueisha.co.jp/titles/100017")
-    data = driver.find_elements_by_css_selector("div.ChapterListItem-module_chapterListItem_ykICp")
-
+    data = driver.find_elements_by_class_name("ChapterListItem-module_chapterListItem_ykICp")
     chapter = -1
     link = "https://mangaplus.shueisha.co.jp/viewer/"
     items = []
 
-    for element in data: 
+    if data == []: 
+            return find_chapter_link_mp(driver)
+    else:
+        for element in data: 
+            
+            for line in element.text.split("\n"):
+                if not line[7:-6] == "-":
+                    items.append(line)
+                
+            links = element.find_elements_by_class_name("ChapterListItem-module_thumbnail_1w6kS")    
 
-        if data == []: 
-            return find_chapter_link(driver)
+            for i in links:
+                items.append(i.get_attribute("data-src"))
+    
+        print (items)
+        for i in range(0,len(items),4):
+            print(items[i])
+            if items[i] == "#298":
+                return ((items[i],items[i+1],items[i+2],link+(items[i+3][len("https://mangaplus.shueisha.co.jp/drm/title/100017/chapter/"):]).split("/")[0]))
 
-        for line in element.text.split("\n"):
-            if not line[2:-2] == ":" and not line[len(line)-1:] == "o":
-                items.append(line)
 
-        links = element.find_elements_by_class_name("ChapterListItem-module_thumbnail_1w6kS")
-       
-        for i in links:
-            items.append(i.get_attribute("data-src"))
-
-    for i in range(0,len(items),4):
-        if items[i] == "#298":
-            return ((items[i],items[i+1],items[i+2],link+(items[i+3][len("https://mangaplus.shueisha.co.jp/drm/title/100017/chapter/"):]).split("/")[0]))
-
-     
 def find_chapter_date(driver):
     driver.get("https://mangaplus.shueisha.co.jp/titles/100017")
     data = driver.find_elements_by_tag_name("p")
@@ -82,7 +83,7 @@ async def on_message(message):
     await message.channel.send("\nMangaplus : {0} \nViz : {1}".format(settings["links"]["mangaplus"],settings["links"]["viz"]))  
   
   elif message.content.startswith("$mha_chapter"):
-    chapter = find_chapter_link(driver)
+    chapter = find_chapter_link_mp(driver)
     await message.channel.send("You can read the newest My Hero Academia Chapter **{0}**, released {1}, on\nMangaplus : {2}".format(chapter[1],chapter[2],chapter[3]))
 
   elif message.content.startswith("$help"):
