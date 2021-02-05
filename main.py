@@ -15,50 +15,6 @@ with open("settings.json") as json_data:
 client.run(settings["settings"]["token"])
 
 
-def find_chapter_link_mp(driver):
-    driver.get("https://mangaplus.shueisha.co.jp/titles/100017")
-    data = driver.find_elements_by_class_name("ChapterListItem-module_chapterListItem_ykICp")
-    chapter = -1
-    link = "https://mangaplus.shueisha.co.jp/viewer/"
-    items = []
-
-    if data == []: 
-            return find_chapter_link_mp(driver)
-    else:
-        for element in data: 
-            
-            for line in element.text.split("\n"):
-                if not line[7:-6] == "-":
-                    items.append(line)
-                
-            links = element.find_elements_by_class_name("ChapterListItem-module_thumbnail_1w6kS")    
-
-            for i in links:
-                items.append(i.get_attribute("data-src"))
-    
-        print (items)
-        for i in range(0,len(items),4):
-            print(items[i])
-            if items[i] == "#298":
-                return ((items[i],items[i+1],items[i+2],link+(items[i+3][len("https://mangaplus.shueisha.co.jp/drm/title/100017/chapter/"):]).split("/")[0]))
-
-
-def find_chapter_date(driver):
-    driver.get("https://mangaplus.shueisha.co.jp/titles/100017")
-    data = driver.find_elements_by_tag_name("p")
-    date_of_chapter = ""  
-
-    for i in data: 
-        if "day" in i.text:
-            date_of_chapter = i.text
-    
-    if date_of_chapter == "":
-        return find_chapter_date(driver)
-    
-    split_date = date_of_chapter.split(", ")
-    return datetime.datetime(2020,(int)(months[(split_date[1][:-3])]),(int)(split_date[1][4:]),(int)(split_date[2][:-3]))
-
-
 @client.event
 async def on_ready():
   print('We have logged in as {0.user}'.format(client))
@@ -70,13 +26,13 @@ async def on_message(message):
     return
 
   elif message.content.startswith("$mha_when"):
-    await message.channel.send(find_chapter_date(driver))
+    await message.channel.send(find_chapter_date())
 
   elif message.content.startswith("$mha_where"):
     await message.channel.send("\nMangaplus : {0} \nViz : {1}".format(settings["links"]["mangaplus"],settings["links"]["viz"]))  
   
   elif message.content.startswith("$mha_chapter"):
-    chapter = find_chapter_link_mp(driver)
+    chapter = find_chapter_link_mp()
     await message.channel.send("You can read the newest My Hero Academia Chapter **{0}**, released {1}, on\nMangaplus : {2}".format(chapter[1],chapter[2],chapter[3]))
 
   elif message.content.startswith("$help"):
@@ -99,8 +55,3 @@ def set_channel(new_channel):
 
   with open("settings.json","w") as json_data:
     json.dump(settings, json_data, indent=2)
-
-
-
-print(find_chapter_date())
-print(find_chapter_link_mp("299"))

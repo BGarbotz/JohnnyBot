@@ -62,3 +62,8 @@ def find_chapter_date():
     
     split_date = date_of_chapter.split(", ")
     return datetime.datetime(2020,(int)(months[(split_date[1][:-3])]),(int)(split_date[1][4:]),(int)(split_date[2][:-3]))
+
+
+    
+print(find_chapter_date())
+print(find_chapter_link_mp("299"))
